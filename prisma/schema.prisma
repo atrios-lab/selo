@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Consumidor da API (o SaaS principal, futuros produtos).
+model Product {
+  id         String     @id @default(cuid())
+  name       String     @unique
+  apiKeyHash String     @unique
+  /// Reservado pro v2 — não dispara nada no v1.
+  webhookUrl String?
+  active     Boolean    @default(true)
+  createdAt  DateTime   @default(now())
+  emailLogs  EmailLog[]
+}
+
+enum DomainStatus {
+  PENDING
+  VERIFYING
+  VERIFIED
+  FAILED
+}
+
+/// Domínio remetente de uma empresa cliente. 1 identity SES + 1 tenant SES.
+model SendingDomain {
+  id             String       @id @default(cuid())
+  clientName     String
+  domain         String       @unique
+  sesTenantName  String       @unique
+  status         DomainStatus @default(PENDING)
+  /// Os 3 tokens do Easy DKIM (viram 3 CNAMEs).
+  dkimTokens     String[]
+  mailFromDomain String?
+  /// Nunca envia por este domínio; sempre usa o fallback do Selo.
+  fallbackOnly   Boolean      @default(false)
+  createdAt      DateTime     @default(now())
+  verifiedAt     DateTime?
+  lastCheckedAt  DateTime?
+
+  emailLogs    EmailLog[]
+  suppressions SuppressedAddress[]
+
+  @@index([status])
+}
+
+enum EmailStatus {
+  SENT
+  DELIVERED
+  BOUNCED
+  COMPLAINED
+  SUPPRESSED
+  REJECTED
+}
+
+/// Metadados de cada envio. NUNCA o corpo do email.
+model EmailLog {
+  id              String      @id @default(cuid())
+  productId       String
+  product         Product     @relation(fields: [productId], references: [id])
+  sendingDomainId String?
+  sendingDomain   SendingDomain? @relation(fields: [sendingDomainId], references: [id])
+
+  from        String
+  to          String
+  subject     String
+  tag         String?
+  metadata    Json?
+  idempotencyKey String?
+  sesMessageId   String?
+  status         EmailStatus
+  usedFallback   Boolean     @default(false)
+  errorDetail    String?
+
+  createdAt   DateTime  @default(now())
+  deliveredAt DateTime?
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([productId, idempotencyKey])
+  @@index([sesMessageId])
+  @@index([to])
+  @@index([tag])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum SuppressionReason {
+  HARD_BOUNCE
+  COMPLAINT
+  MANUAL
+}
+
+/// Supressão por cliente (não global) — espelha o tenant no SES.
+model SuppressedAddress {
+  id              String            @id @default(cuid())
+  sendingDomainId String
+  sendingDomain   SendingDomain     @relation(fields: [sendingDomainId], references: [id], onDelete: Cascade)
+  address         String
+  reason          SuppressionReason
+  detail          String?
+  createdAt       DateTime          @default(now())
+
+  @@unique([sendingDomainId, address])
+  @@index([address])
+}

@@ -1,26 +1,160 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ponytail: painel de operador único, sempre claro — sem variante dark. */
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-archivo);
+  --font-mono: var(--font-plex-mono);
+  --font-heading: var(--font-archivo);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@theme {
+  /* Identidade Selo */
+  --color-brand: #f5c400;
+  --color-brand-tint: #fdf3c4;
+  --color-ink: #141414;
+  --color-ink-soft: #232220;
+  --color-line: #efede6;
+  --color-body: #5a5750;
+  --color-mono: #3d3b35;
+  /* Cinzas de texto: os três passam de 4.5:1 sobre #FAF9F5 e sobre branco.
+     O mockup usava #8A867C (3,6:1) e #B8B4A9 (2,1:1) — ilegíveis em 11 px. */
+  --color-faint: #6b6860;
+  --color-fainter: #726e64;
+  --color-ghost: #767063;
+  /* Exclusivo da sidebar escura (8,9:1 sobre #141414). */
+  --color-on-ink: #b8b4a9;
+
+  /* Semáforo: sempre cor + rótulo, nunca cor sozinha. */
+  --color-ok-bg: #e3f2e5;
+  --color-ok-fg: #1f7a33;
+  --color-ok-dot: #2e9e45;
+  --color-bad-bg: #fbeaea;
+  --color-bad-fg: #8a2323;
+  --color-bad-dot: #d64545;
+  --color-warn-bg: #fcebd7;
+  --color-warn-fg: #8a4b00;
+  --color-warn-dot: #e07c1f;
+  --color-mute-bg: #efede6;
+  --color-mute-fg: #5a5750;
+  --color-mute-dot: #8a867c;
+  --color-idle-bg: #f5f4ef;
+  --color-idle-fg: #6b6860;
+  --color-idle-dot: #b8b4a9;
+}
+
+:root {
+  --background: #faf9f5;
+  --foreground: #141414;
+  --card: #ffffff;
+  --card-foreground: #141414;
+  --popover: #ffffff;
+  --popover-foreground: #141414;
+  --primary: #141414;
+  --primary-foreground: #ffffff;
+  --secondary: #efede6;
+  --secondary-foreground: #141414;
+  --muted: #f5f4ef;
+  --muted-foreground: #6b6860;
+  --accent: #fdf3c4;
+  --accent-foreground: #141414;
+  --destructive: #c22f2f;
+  --border: #e4e1d8;
+  --input: #e4e1d8;
+  /* Tinta, não amarelo: o anel do shadcn precisa aparecer também sobre os
+     botões amarelos, e amarelo-sobre-amarelo some. */
+  --ring: #141414;
+  --radius: 0.5rem;
+}
+
+@keyframes stampIn {
+  0% {
+    transform: rotate(-6deg) scale(1.6);
+    opacity: 0;
+  }
+  70% {
+    transform: rotate(-6deg) scale(0.96);
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(-6deg) scale(1);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground text-[13px];
+  }
+  html {
+    @apply font-sans;
+  }
+
+  /* Foco visível em tudo que é clicável — as linhas de tabela e os chips de
+     filtro são <a>/<button> crus, não passam pelos componentes do shadcn. */
+  a:focus-visible,
+  button:focus-visible,
+  [tabindex]:focus-visible {
+    /* Tinta, não o amarelo da marca: o anel precisa aparecer também em cima
+       dos botões amarelos, onde amarelo-sobre-amarelo some. */
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Na sidebar escura vale o inverso. */
+  nav a:focus-visible,
+  nav button:focus-visible {
+    outline-color: var(--color-brand);
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+/* Precisa de !important pra vencer as utilities do Tailwind. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: preferência do sistema vence a utility */
+    animation-duration: 1ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: preferência do sistema vence a utility */
+    transition-duration: 1ms !important;
+  }
+}
+
+@utility carimbo {
+  @apply inline-block rounded-md border-[3px] border-double border-ok-fg px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-[2px] text-ok-fg;
+  animation: stampIn 0.45s ease-out;
+  transform: rotate(-6deg);
 }
