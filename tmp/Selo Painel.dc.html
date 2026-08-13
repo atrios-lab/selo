@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FAF9F5;color:#141414}
+a{color:#141414;text-decoration:underline;text-decoration-color:#F5C400;text-decoration-thickness:2px}
+a:hover{background:#FDF3C4}
+button{font-family:Archivo,sans-serif}
+input,textarea,select{font-family:Archivo,sans-serif}
+@keyframes stampIn{0%{transform:rotate(-6deg) scale(1.6);opacity:0}70%{transform:rotate(-6deg) scale(.96);opacity:1}100%{transform:rotate(-6deg) scale(1)}}
+</style>
+</helmet>
+<div style="font-family:Archivo,sans-serif;min-height:100vh;background:#FAF9F5;color:#141414;font-size:13px">
+
+<!-- ============ LOGIN ============ -->
+<sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
+<div data-screen-label="Login" style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:#141414">
+  <div style="width:360px;background:#FAF9F5;border-radius:14px;padding:38px 36px 34px">
+    <div style="display:flex;align-items:baseline;gap:1px;font-weight:800;font-size:32px;letter-spacing:-0.5px;color:#141414;margin-bottom:26px">selo<span style="color:#F5C400">.</span></div>
+    <sc-if value="{{ authCreds }}" hint-placeholder-val="{{ true }}">
+      <div style="font-size:12px;color:#8A867C;margin-bottom:22px;font-family:'IBM Plex Mono',monospace">painel de operação · acesso restrito</div>
+      <sc-if value="{{ authErrCreds }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#FBECEC;color:#A83232;font-size:12.5px;line-height:1.45;border-radius:8px;padding:9px 12px;margin-bottom:16px">Email ou senha incorretos. Após 5 tentativas, o acesso fica bloqueado por 15 minutos.</div>
+      </sc-if>
+      <sc-if value="{{ authErrEmail }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#FBECEC;color:#A83232;font-size:12.5px;line-height:1.45;border-radius:8px;padding:9px 12px;margin-bottom:16px">Informe seu email para receber o link de acesso.</div>
+      </sc-if>
+      <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">Email</label>
+      <input value="{{ authEmail }}" onChange="{{ onAuthEmail }}" onKeyDown="{{ onAuthKey }}" placeholder="voce@selo.app" style="width:100%;box-sizing:border-box;font-size:13.5px;padding:10px 12px;border:1px solid {{ credsBorder }};border-radius:8px;background:#fff;outline-color:#F5C400;margin-bottom:14px"></input>
+      <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">Senha</label>
+      <input type="password" value="{{ authSenha }}" onChange="{{ onAuthSenha }}" onKeyDown="{{ onAuthKey }}" placeholder="••••••••" style="width:100%;box-sizing:border-box;font-size:13.5px;padding:10px 12px;border:1px solid {{ credsBorder }};border-radius:8px;background:#fff;outline-color:#F5C400;margin-bottom:20px"></input>
+      <button onClick="{{ doLogin }}" style="width:100%;background:#F5C400;color:#141414;border:none;border-radius:8px;padding:11px;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 4px 14px rgba(245,196,0,.25)">Entrar</button>
+      <div style="text-align:center;margin-top:14px"><a href="#" onClick="{{ goMagic }}" style="font-size:12.5px">receber link de acesso por email</a></div>
+    </sc-if>
+    <sc-if value="{{ authOtp }}" hint-placeholder-val="{{ false }}">
+      <div style="font-size:15px;font-weight:800;margin-bottom:6px">Verificação em duas etapas</div>
+      <div style="font-size:12.5px;color:#5A5750;line-height:1.5;margin-bottom:20px">Enviamos um código de 6 dígitos para <span style="font-weight:700">{{ authMasked }}</span>.</div>
+      <sc-if value="{{ authErrOtp }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#FBECEC;color:#A83232;font-size:12.5px;border-radius:8px;padding:9px 12px;margin-bottom:14px">Código incorreto ou expirado. Tente de novo.</div>
+      </sc-if>
+      <input value="{{ authCode }}" onChange="{{ onAuthCode }}" autoFocus="{{ true }}" inputMode="numeric" placeholder="······" style="width:100%;box-sizing:border-box;font-family:'IBM Plex Mono',monospace;font-size:24px;letter-spacing:12px;text-align:center;padding:12px 0 12px 12px;border:1px solid {{ otpBorder }};border-radius:8px;background:#fff;outline-color:#F5C400;margin-bottom:16px"></input>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px">
+        <a href="#" onClick="{{ doResend }}" style="opacity:{{ resendDim }}">{{ resendLabel }}</a>
+        <a href="#" onClick="{{ backToCreds }}">usar outra conta</a>
+      </div>
+      <div style="margin-top:22px;font-size:11px;color:#B8B4A9;font-family:'IBM Plex Mono',monospace">protótipo: qualquer código entra · 000000 simula erro</div>
+    </sc-if>
+    <sc-if value="{{ authLink }}" hint-placeholder-val="{{ false }}">
+      <div style="width:44px;height:44px;border-radius:50%;background:#E7F2E9;color:#2E7D43;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;margin-bottom:16px">✓</div>
+      <div style="font-size:15px;font-weight:800;margin-bottom:6px">Link enviado</div>
+      <div style="font-size:12.5px;color:#5A5750;line-height:1.5;margin-bottom:20px">Mandamos um link de acesso para <span style="font-weight:700">{{ authMasked }}</span>. Ele expira em 15 minutos e funciona uma única vez.</div>
+      <button onClick="{{ openMagicLink }}" style="width:100%;background:#fff;color:#141414;border:1px solid #E4E1D8;border-radius:8px;padding:10px;font-weight:700;font-size:13px;cursor:pointer" style-hover="background:#FDF3C4;border-color:#F5C400">simular clique no link do email</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-size:12.5px;margin-top:16px">
+        <a href="#" onClick="{{ doResend }}" style="opacity:{{ resendDim }}">{{ resendLabel }}</a>
+        <a href="#" onClick="{{ backToCreds }}">voltar para senha</a>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isApp }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;min-height:100vh">
+  <!-- ============ SIDEBAR ============ -->
+  <nav style="width:196px;flex:none;background:#141414;color:#B8B4A9;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;box-sizing:border-box">
+    <div style="padding:20px 18px 16px;display:flex;align-items:baseline;gap:1px;font-weight:800;font-size:19px;letter-spacing:-0.5px;color:#fff">selo<span style="color:#F5C400">.</span></div>
+    <button onClick="{{ openSearch }}" style="margin:0 14px 14px;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.07);color:#8A867C;border:none;border-radius:8px;padding:8px 12px;font-size:12.5px;cursor:pointer;text-align:left" style-hover="background:rgba(255,255,255,.12);color:#B8B4A9">
+      <span style="flex:1">Buscar…</span><span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;background:rgba(255,255,255,.1);border-radius:4px;padding:1px 6px;color:#6B6860">/</span>
+    </button>
+    <sc-for list="{{ navItems }}" as="n" hint-placeholder-count="5">
+      <button onClick="{{ n.go }}" style="display:flex;align-items:center;justify-content:space-between;background:{{ n.bg }};color:{{ n.fg }};border:none;border-left:3px solid {{ n.edge }};padding:9px 15px;font-size:13px;font-weight:{{ n.w }};cursor:pointer;text-align:left" style-hover="background:#232220">
+        {{ n.label }}
+        <sc-if value="{{ n.count }}" hint-placeholder-val="{{ false }}"><span style="background:#F5C400;color:#141414;border-radius:999px;padding:1px 7px;font-size:11px;font-weight:800">{{ n.count }}</span></sc-if>
+      </button>
+    </sc-for>
+    <div style="flex:1"></div>
+    <button onClick="{{ doLogout }}" style="background:transparent;color:#6B6860;border:none;padding:10px 18px 18px;font-size:12px;cursor:pointer;text-align:left" style-hover="color:#B8B4A9">Sair</button>
+  </nav>
+
+  <main style="flex:1;min-width:0;padding:26px 32px 80px;max-width:1180px">
+
+  <!-- ============ DASHBOARD ============ -->
+  <sc-if value="{{ isDash }}" hint-placeholder-val="{{ true }}">
+  <div data-screen-label="Dashboard">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:20px">
+      <h1 style="margin:0;font-size:21px;font-weight:800;letter-spacing:-0.4px">Farol</h1>
+      <span style="font-size:12px;color:#8A867C;font-family:'IBM Plex Mono',monospace">atualizado há 2 min</span>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px">
+      <sc-for list="{{ stats }}" as="s" hint-placeholder-count="4">
+        <div style="background:#fff;border:1px solid #E4E1D8;border-radius:10px;padding:16px 18px">
+          <div style="font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;color:{{ s.color }};letter-spacing:-0.5px">{{ s.value }}</div>
+          <div style="font-size:12px;color:#6B6860;margin-top:3px">{{ s.label }}</div>
+          <sc-if value="{{ s.sub }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px;color:#8A867C;margin-top:2px;font-family:'IBM Plex Mono',monospace">{{ s.sub }}</div></sc-if>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+      <h2 style="margin:0;font-size:14px;font-weight:800;letter-spacing:.3px;text-transform:uppercase">Fila de ação</h2>
+      <span style="font-size:12px;color:#8A867C">{{ filaResumo }}</span>
+    </div>
+    <sc-if value="{{ filaEmpty }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#fff;border:1px solid #E4E1D8;border-radius:12px;padding:44px;display:flex;align-items:center;gap:26px;margin-bottom:24px">
+        <div style="flex:none;padding:10px 20px;border:3px double #1F7A33;border-radius:6px;color:#1F7A33;font-weight:800;font-size:14px;letter-spacing:2px;text-transform:uppercase;transform:rotate(-6deg);animation:stampIn .45s ease-out">Tudo em ordem</div>
+        <div><div style="font-size:16px;font-weight:800;margin-bottom:3px">Nada exige sua ação.</div><div style="font-size:13px;color:#6B6860">Sem devoluções novas, domínios saudáveis, entrega estável. Pode fechar o painel.</div></div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ filaCheia }}" hint-placeholder-val="{{ true }}">
+      <div style="background:#fff;border:1px solid #E4E1D8;border-radius:12px;overflow-x:auto;margin-bottom:24px">
+        <sc-for list="{{ fila }}" as="f" hint-placeholder-count="3">
+          <div style="display:flex;align-items:center;gap:14px;padding:13px 18px;border-top:1px solid #EFEDE6">
+            <span style="flex:none;display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;background:{{ f.bg }};color:{{ f.fg }};white-space:nowrap"><span style="width:6px;height:6px;border-radius:50%;background:{{ f.dot }}"></span>{{ f.tag }}</span>
+            <span style="flex:1;min-width:0;font-size:13px;color:#3D3B35">{{ f.pre }}<span style="font-family:'IBM Plex Mono',monospace;font-size:12px;background:#EFEDE6;padding:1px 5px;border-radius:4px">{{ f.mono }}</span>{{ f.post }}</span>
+            <button onClick="{{ f.a1 }}" style="flex:none;background:#141414;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer">{{ f.a1Label }}</button>
+            <button onClick="{{ f.treat }}" style="flex:none;background:transparent;color:#8A867C;border:1px solid #E4E1D8;border-radius:7px;padding:6px 12px;font-size:12px;cursor:pointer" style-hover="color:#141414;border-color:#B8B4A9">tratado</button>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+    <h2 style="margin:0 0 10px;font-size:14px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:#6B6860">Envios · 30 dias</h2>
+    <div style="background:#fff;border:1px solid #E4E1D8;border-radius:12px;padding:18px 18px 12px">
+      <div style="display:flex;align-items:flex-end;gap:4px;height:64px">
+        <sc-for list="{{ bars }}" as="b" hint-placeholder-count="30">
+          <div style="flex:1;background:{{ b.c }};border-radius:2px 2px 0 0;height:{{ b.h }}"></div>
+        </sc-for>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:10.5px;color:#B8B4A9;font-family:'IBM Plex Mono',monospace;margin-top:6px"><span>10/07</span><span>hoje · 48.312 no mês</span></div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ DOMÍNIOS ============ -->
+  <sc-if value="{{ isDoms }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Domínios — lista">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h1 style="margin:0;font-size:21px;font-weight:800;letter-spacing:-0.4px">Domínios</h1>
+      <button onClick="{{ openAdd }}" style="background:#F5C400;color:#141414;border:none;border-radius:8px;padding:9px 16px;font-weight:800;font-size:13px;cursor:pointer">+ Adicionar domínio</button>
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:14px">
+      <sc-for list="{{ domFilters }}" as="df" hint-placeholder-count="6">
+        <button onClick="{{ df.set }}" style="background:{{ df.bg }};color:{{ df.fg }};border:1px solid {{ df.bd }};border-radius:999px;padding:5px 13px;font-size:12px;font-weight:600;cursor:pointer">{{ df.label }}</button>
+      </sc-for>
+    </div>
+    <div style="background:#fff;border:1px solid #E4E1D8;border-radius:12px;overflow-x:auto">
+      <div style="display:grid;grid-template-columns:minmax(90px,1fr) minmax(150px,1.5fr) 130px 92px 88px 84px;min-width:720px;column-gap:12px;padding:9px 18px;font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#8A867C;border-bottom:1px solid #EFEDE6;white-space:nowrap"><span>Cliente</span><span>Domínio</span><span>Estado</span><span>No estado há</span><span>Entrega 30d</span><span>Enviados 30d</span></div>
+      <sc-for list="{{ doms }}" as="d" hint-placeholder-count="7">
+        <button onClick="{{ d.open }}" style="display:grid;grid-template-columns:minmax(90px,1fr) minmax(150px,1.5fr) 130px 92px 88px 84px;min-width:720px;column-gap:12px;width:100%;box-sizing:border-box;padding:11px 18px;border:none;border-top:1px solid #EFEDE6;background:transparent;text-align:left;font-size:13px;cursor:pointer;align-items:center" style-hover="background:#FAF9F5">
+          <span style="font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ d.cliente }}</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#3D3B35">{{ d.dominio }}</span>
+          <span><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;background:{{ d.bg }};color:{{ d.fg }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ d.dot }}"></span>{{ d.stLabel }}</span></span>
+          <span style="color:#6B6860;font-variant-numeric:tabular-nums">{{ d.tempo }}</span>
+          <span style="font-variant-numeric:tabular-nums;font-weight:600;color:{{ d.entColor }}">{{ d.entrega }}<sc-if value="{{ d.alerta }}" hint-placeholder-val="{{ false }}"><span style="display:block;font-size:10.5px;color:#B84A00;font-weight:700">↓ caindo</span></sc-if></span>
+          <span style="font-variant-numeric:tabular-nums;color:#6B6860">{{ d.enviados }}</span>
+        </button>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ DOMÍNIO DETALHE ============ -->
+  <sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Domínio — detalhe">
+    <a href="#" onClick="{{ goDoms }}" style="font-size:12.5px;font-weight:600">← Domínios</a>
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:16px 0 4px">
+      <h1 style="margin:0;font-size:21px;font-weight:800;letter-spacing:-0.4px">{{ det.cliente }}</h1>
+      <span style="font-family:'IBM Plex Mono',monospace;font-size:15px;color:#3D3B35">{{ det.dominio }}</span>
+      <span style="display:inline-flex;align-items:center;gap:6px;padding:3px 11px;border-radius:999px;font-size:11.5px;font-weight:700;background:{{ det.bg }};color:{{ det.fg }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ det.dot }}"></span>{{ det.stLabel }}</span>
+      <div style="flex:1"></div>
+      <span style="font-size:12px;color:#8A867C;font-family:'IBM Plex Mono',monospace">entrega 30d: {{ det.entrega }} · verificado {{ lastCheck }}</span>
+      <button onClick="{{ verifyNow }}" style="background:#141414;color:#fff;border:none;border-radius:8px;padding:8px 15px;font-weight:700;font-size:12.5px;cursor:pointer">{{ verifyLabel }}</button>
+    </div>
+    <sc-if value="{{ det.verificado }}" hint-placeholder-val="{{ false }}">
+      <div style="display:inline-block;margin:8px 0 2px;padding:6px 14px;border:3px double #1F7A33;border-radius:6px;color:#1F7A33;font-weight:800;font-size:12px;letter-spacing:2px;text-transform:uppercase;transform:rotate(-6deg);animation:stampIn .45s ease-out">Autenticado</div>
+    </sc-if>
+    <sc-if value="{{ det.autoCta }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#fff;border:1px solid #E4E1D8;border-radius:12px;padding:18px 20px;margin:16px 0;display:flex;align-items:center;gap:16px;box-shadow:0 4px 14px rgba(20,20,20,.06)">
+        <div style="flex:1"><div style="font-size:14px;font-weight:800;margin-bottom:2px">DNS deste domínio está na Cloudflare — integração disponível</div><div style="font-size:12.5px;color:#6B6860">Os 5 registros podem ser publicados automaticamente, sem copiar e colar.</div></div>
+        <button onClick="{{ autoPublish }}" style="background:#F5C400;color:#141414;border:none;border-radius:8px;padding:10px 16px;font-weight:800;font-size:13px;cursor:pointer;white-space:nowrap">{{ autoLabel }}</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ det.autoOk }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#E3F2E5;border:1px solid #BFE3C4;border-radius:10px;padding:12px 16px;margin:16px 0;font-size:12.5px;color:#1F7A33;font-weight:600">Registros publicados via Cloudflare ✓ — verificação concluída.</div>
+    </sc-if>
+    <h2 style="margin:22px 0 10px;font-size:14px;font-weight:800;letter-spacing:.3px;text-transform:uppercase">Registros DNS</h2>
+    <div style="background:#fff;border:1px solid #E4E1D8;border-radius:12px;overflow-x:auto">
+      <div style="display:grid;grid-template-columns:64px 1.1fr 1.2fr 210px;min-width:680px;column-gap:12px;padding:9px 18px;font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#8A867C;border-bottom:1px solid #EFEDE6;white-space:nowrap"><span>Tipo</span><span>Nome</span><span>Valor</span><span>Status</span></div>
+      <sc-for list="{{ recs }}" as="r" hint-placeholder-count="5">
+        <div style="display:grid;grid-template-columns:64px 1.1fr 1.2fr 210px;min-width:680px;column-gap:12px;padding:12px 18px;border-top:1px solid #EFEDE6;align-items:start;font-size:12.5px">
+          <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:11.5px">{{ r.type }}</span>
+          <span style="padding-right:12px;min-width:0;display:flex;align-items:baseline;gap:6px"><span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;word-break:break-all;color:#3D3B35">{{ r.name }}</span><button onClick="{{ r.copyName }}" title="copiar nome" style="flex:none;border:none;background:transparent;padding:2px;cursor:pointer;color:#B8B4A9;line-height:0;position:relative;top:2px" style-hover="color:#141414"><sc-if value="{{ r.nameCopied }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:700;color:#1F7A33;line-height:1">✓</span></sc-if><sc-if value="{{ r.nameNotCopied }}" hint-placeholder-val="{{ true }}"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><rect x="4.5" y="4.5" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"></rect><rect x="1.5" y="1.5" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="#fff"></rect></svg></sc-if></button></span>
+          <span style="padding-right:12px;min-width:0;display:flex;align-items:baseline;gap:6px"><span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;word-break:break-all;color:#3D3B35">{{ r.value }}</span><button onClick="{{ r.copyValue }}" title="copiar valor" style="flex:none;border:none;background:transparent;padding:2px;cursor:pointer;color:#B8B4A9;line-height:0;position:relative;top:2px" style-hover="color:#141414"><sc-if value="{{ r.valueCopied }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px;font-weight:700;color:#1F7A33;line-height:1">✓</span></sc-if><sc-if value="{{ r.valueNotCopied }}" hint-placeholder-val="{{ true }}"><svg width="12" height="12" viewBox="0 0 14 14" fill="none"><rect x="4.5" y="4.5" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4"></rect><rect x="1.5" y="1.5" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.4" fill="#fff"></rect></svg></sc-if></button></span>
+          <span>
+            <span style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:{{ r.stColor }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ r.stDot }}"></span>{{ r.stLabel }}</span>
+            <sc-if value="{{ r.diff }}" hint-placeholder-val="{{ false }}">
+              <span style="display:block;margin-top:6px;font-size:11px;line-height:1.5">
+                <span style="display:block;color:#8A2323">encontrado: <span style="font-family:'IBM Plex Mono',monospace;background:#FBEAEA;padding:0 4px;border-radius:3px;word-break:break-all">{{ r.diffFound }}</span></span>
+                <span style="display:block;color:#1F7A33">esperado:&nbsp;&nbsp; <span style="font-family:'IBM Plex Mono',monospace;background:#E3F2E5;padding:0 4px;border-radius:3px;word-break:break-all">{{ r.diffWant }}</span></span>
+              </span>
+            </sc-if>
+          </span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:16px;margin-top:24px">
+      <div>
+        <h2 style="margin:0 0 10px;font-size:14px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:#6B6860">Últimos envios</h2>
+        <div style="background:#fff;border:1px solid #E4E1D8;border-radius:12px;overflow-x:auto">
+          <sc-for list="{{ det.envios }}" as="e" hint-placeholder-count="3">
+            <div style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-top:1px solid #EFEDE6;font-size:12px">
+              <span style="font-family:'IBM Plex Mono',monospace;color:#8A867C;flex:none">{{ e.hora }}</span>
+              <span style="font-family:'IBM Plex Mono',monospace;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ e.para }}</span>
+              <span style="display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:10.5px;font-weight:700;background:{{ e.bg }};color:{{ e.fg }};flex:none"><span style="width:5px;height:5px;border-radius:50%;background:{{ e.dot }}"></span>{{ e.st }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div>
+        <h2 style="margin:0 0 10px;font-size:14px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:#6B6860">Supressões do cliente</h2>
+        <div style="background:#fff;border:1px solid #E4E1D8;border-radius:12px;padding:14px 16px;font-size:12.5px;color:#6B6860">{{ det.supTxt }} <a href="#" onClick="{{ goSups }}">ver supressões</a></div>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ ENVIOS ============ -->
+  <sc-if value="{{ isLog }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Envios — log">
+    <h1 style="margin:0 0 16px;font-size:21px;font-weight:800;letter-spacing:-0.4px">Envios</h1>
+    <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap">
+      <input value="{{ logQuery }}" onChange="{{ onLogQuery }}" placeholder="buscar destinatário…" style="font-family:'IBM Plex Mono',monospace;font-size:12px;padding:7px 12px;border:1px solid #E4E1D8;border-radius:8px;background:#fff;outline-color:#F5C400;width:240px"></input>
+      <sc-for list="{{ logFilters }}" as="lf" hint-placeholder-count="6">
+        <button onClick="{{ lf.set }}" style="background:{{ lf.bg }};color:{{ lf.fg }};border:1px solid {{ lf.bd }};border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer">{{ lf.label }}</button>
+      </sc-for>
+      <span style="font-size:11.5px;color:#8A867C;margin-left:auto;font-family:'IBM Plex Mono',monospace">últimos 7 dias</span>
+    </div>
+    <div style="background:#fff;border:1px solid #E4E1D8;border-radius:12px;overflow-x:auto">
+      <div style="display:grid;grid-template-columns:96px minmax(180px,1.7fr) minmax(110px,1fr) 96px 130px;min-width:720px;column-gap:12px;padding:9px 18px;font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#8A867C;border-bottom:1px solid #EFEDE6;white-space:nowrap"><span>Data/hora</span><span>De → Para</span><span>Assunto</span><span>Tag</span><span>Status</span></div>
+      <sc-for list="{{ logs }}" as="l" hint-placeholder-count="8">
+        <div>
+        <button onClick="{{ l.toggle }}" style="display:grid;grid-template-columns:96px minmax(180px,1.7fr) minmax(110px,1fr) 96px 130px;min-width:720px;column-gap:12px;width:100%;box-sizing:border-box;padding:10px 18px;border:none;border-top:1px solid #EFEDE6;background:{{ l.rowBg }};text-align:left;font-size:12.5px;cursor:pointer;align-items:center" style-hover="background:#FAF9F5">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#8A867C">{{ l.dt }}</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#3D3B35">{{ l.rota }}</span>
+          <span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#5A5750">{{ l.assunto }}</span>
+          <span><span style="font-family:'IBM Plex Mono',monospace;font-size:10.5px;background:#EFEDE6;padding:2px 8px;border-radius:4px;color:#5A5750">{{ l.tag }}</span></span>
+          <span><span style="display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;background:{{ l.bg }};color:{{ l.fg }}"><span style="width:6px;height:6px;border-radius:50%;background:{{ l.dot }}"></span>{{ l.st }}</span></span>
+        </button>
+        <sc-if value="{{ l.open }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:4px 18px 16px 126px;background:#FAF9F5;border-top:1px dashed #E4E1D8">
+            <sc-for list="{{ l.timeline }}" as="t" hint-placeholder-count="2">
+              <div style="display:flex;align-items:baseline;gap:10px;padding:4px 0;font-size:12px">
+                <span style="width:7px;height:7px;border-radius:50%;background:{{ t.dot }};flex:none;position:relative;top:0"></span>
+                <span style="font-weight:700;width:110px;flex:none">{{ t.ev }}</span>
+                <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#6B6860">{{ t.info }}</span>
+              </div>
+            </sc-for>
+            <div style="font-size:11px;color:#B8B4A9;margin-top:6px">Conteúdo não armazenado — apenas metadados. <span style="font-family:'IBM Plex Mono',monospace">id {{ l.id }}</span></div>
+          </div>
+        </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ SUPRESSÕES ============ -->
+  <sc-if value="{{ isSups }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Supressões">
+    <h1 style="margin:0 0 16px;font-size:21px;font-weight:800;letter-spacing:-0.4px">Supressões</h1>
+    <div style="background:#FCEBD7;border:1px solid #F0C89A;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12.5px;color:#8A4B00;display:flex;align-items:center;gap:10px">
+      <span style="font-weight:800;white-space:nowrap">⚠ Concentração:</span><span><b>Beta Corp</b> acumulou 14 supressões em 30 dias (média dos clientes: 2). Possível lista de emails suja — risco à reputação de envio.</span>
+      <button onClick="{{ goLog }}" style="margin-left:auto;background:#141414;color:#fff;border:none;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap">Investigar envios</button>
+    </div>
+    <div style="background:#fff;border:1px solid #E4E1D8;border-radius:12px;overflow-x:auto">
+      <div style="display:grid;grid-template-columns:minmax(170px,1.6fr) minmax(80px,1fr) 110px 86px 92px 74px;min-width:700px;column-gap:12px;padding:9px 18px;font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#8A867C;border-bottom:1px solid #EFEDE6;white-space:nowrap"><span>Endereço</span><span>Cliente</span><span>Motivo</span><span>Data</span><span>Origem</span><span></span></div>
+      <sc-for list="{{ sups }}" as="s" hint-placeholder-count="6">
+        <div style="display:grid;grid-template-columns:minmax(170px,1.6fr) minmax(80px,1fr) 110px 86px 92px 74px;min-width:700px;column-gap:12px;padding:10px 18px;border-top:1px solid #EFEDE6;font-size:12.5px;align-items:center;background:{{ s.rowBg }}">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:#3D3B35">{{ s.email }}</span>
+          <span style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.cliente }}</span>
+          <span><span style="display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;background:{{ s.bg }};color:{{ s.fg }}"><span style="width:5px;height:5px;border-radius:50%;background:{{ s.dot }}"></span>{{ s.motivo }}</span></span>
+          <span style="font-variant-numeric:tabular-nums;color:#6B6860">{{ s.data }}</span>
+          <span style="color:#6B6860">{{ s.origem }}</span>
+          <span style="text-align:right"><button onClick="{{ s.remove }}" style="background:transparent;color:#8A867C;border:1px solid #E4E1D8;border-radius:6px;padding:4px 10px;font-size:11.5px;cursor:pointer" style-hover="color:#8A2323;border-color:#EFC2C2">remover</button></span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- ============ PRODUTOS ============ -->
+  <sc-if value="{{ isProds }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Produtos — API">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h1 style="margin:0;font-size:21px;font-weight:800;letter-spacing:-0.4px">Produtos</h1>
+      <button onClick="{{ newProd }}" style="background:#F5C400;color:#141414;border:none;border-radius:8px;padding:9px 16px;font-weight:800;font-size:13px;cursor:pointer">+ Novo produto</button>
+    </div>
+    <div style="background:#fff;border:1px solid #E4E1D8;border-radius:12px;overflow-x:auto">
+      <div style="display:grid;grid-template-columns:minmax(140px,1.5fr) 96px 104px 110px 84px;min-width:620px;column-gap:12px;padding:9px 18px;font-size:10.5px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#8A867C;border-bottom:1px solid #EFEDE6;white-space:nowrap"><span>Nome</span><span>Status</span><span>Criado em</span><span>Último uso</span><span></span></div>
+      <sc-for list="{{ prods }}" as="p" hint-placeholder-count="3">
+        <div style="display:grid;grid-template-columns:minmax(140px,1.5fr) 96px 104px 110px 84px;min-width:620px;column-gap:12px;padding:11px 18px;border-top:1px solid #EFEDE6;font-size:12.5px;align-items:center">
+          <span style="font-weight:700">{{ p.nome }}</span>
+          <span><span style="display:inline-flex;align-items:center;gap:6px;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;background:{{ p.bg }};color:{{ p.fg }}"><span style="width:5px;height:5px;border-radius:50%;background:{{ p.dot }}"></span>{{ p.st }}</span></span>
+          <span style="font-variant-numeric:tabular-nums;color:#6B6860">{{ p.criado }}</span>
+          <span style="font-variant-numeric:tabular-nums;color:#6B6860;font-family:'IBM Plex Mono',monospace;font-size:11.5px">{{ p.uso }}</span>
+          <span style="text-align:right"><sc-if value="{{ p.ativo }}" hint-placeholder-val="{{ true }}"><button onClick="{{ p.revoke }}" style="background:transparent;color:#8A867C;border:1px solid #E4E1D8;border-radius:6px;padding:4px 10px;font-size:11.5px;cursor:pointer" style-hover="color:#8A2323;border-color:#EFC2C2">revogar</button></sc-if></span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  </sc-if>
+
+  </main>
+</div>
+
+<!-- ============ MODAL ADICIONAR DOMÍNIO ============ -->
+<sc-if value="{{ addOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:fixed;inset:0;background:rgba(20,20,20,.5);display:flex;align-items:center;justify-content:center;z-index:100">
+  <div style="width:460px;background:#fff;border-radius:14px;padding:26px 28px;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <sc-if value="{{ addStep0 }}" hint-placeholder-val="{{ true }}">
+      <h2 style="margin:0 0 4px;font-size:17px;font-weight:800">Adicionar domínio</h2>
+      <p style="margin:0 0 16px;font-size:12.5px;color:#6B6860;line-height:1.5">O domínio nasce em <b>Pendente</b> — os envios do cliente saem pelo fallback até a autenticação concluir.</p>
+      <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">Cliente</label>
+      <input value="{{ addCliente }}" onChange="{{ onAddCliente }}" placeholder="ex: Acme" style="width:100%;box-sizing:border-box;font-size:13.5px;padding:10px 12px;border:1px solid #E4E1D8;border-radius:8px;outline-color:#F5C400;margin-bottom:14px"></input>
+      <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">Domínio remetente</label>
+      <input value="{{ addDominio }}" onChange="{{ onAddDominio }}" onKeyDown="{{ onAddKey }}" placeholder="acme.com.br" style="width:100%;box-sizing:border-box;font-family:'IBM Plex Mono',monospace;font-size:13px;padding:10px 12px;border:1px solid {{ addBorder }};border-radius:8px;outline-color:#F5C400"></input>
+      <sc-if value="{{ addErrFormat }}" hint-placeholder-val="{{ false }}"><div style="margin-top:8px;font-size:12px;color:#C22F2F">Formato inválido — informe só o domínio, sem <span style="font-family:'IBM Plex Mono',monospace">@</span> ou <span style="font-family:'IBM Plex Mono',monospace">https://</span>.</div></sc-if>
+      <sc-if value="{{ addErrTaken }}" hint-placeholder-val="{{ false }}"><div style="margin-top:8px;font-size:12px;color:#C22F2F">Este domínio já está cadastrado ({{ addTakenCliente }}).</div></sc-if>
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+        <button onClick="{{ closeAdd }}" style="background:transparent;color:#5A5750;border:1px solid #E4E1D8;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer">Cancelar</button>
+        <button onClick="{{ submitAdd }}" style="background:#F5C400;color:#141414;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:800;cursor:pointer">Adicionar</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ addStep1 }}" hint-placeholder-val="{{ false }}">
+      <h2 style="margin:0 0 14px;font-size:17px;font-weight:800">Consultando <span style="font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:15px">{{ addDominio }}</span></h2>
+      <div style="display:flex;flex-direction:column;gap:8px;font-size:12.5px;font-family:'IBM Plex Mono',monospace;color:#6B6860;background:#FAF9F5;border-radius:8px;padding:14px 16px">
+        <span style="color:#1F7A33">✓ domínio resolve</span>
+        <span style="color:#1F7A33">✓ registros de identidade gerados (3 CNAME · 1 MX · 1 TXT)</span>
+        <span>… detectando provedor DNS pelos nameservers</span>
+      </div>
+    </sc-if>
+    <sc-if value="{{ addStep2 }}" hint-placeholder-val="{{ false }}">
+      <h2 style="margin:0 0 10px;font-size:17px;font-weight:800">{{ addDominio }} cadastrado</h2>
+      <sc-if value="{{ addIsCf }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#E3F2E5;border:1px solid #BFE3C4;border-radius:8px;padding:12px 14px;font-size:12.5px;line-height:1.55;color:#1F7A33;margin-bottom:16px">Nameservers apontam para a <b>Cloudflare</b> — integração disponível: os 5 registros podem ser publicados automaticamente, sem copiar e colar.</div>
+      </sc-if>
+      <sc-if value="{{ addIsManual }}" hint-placeholder-val="{{ false }}">
+        <div style="background:#FAF9F5;border:1px solid #E4E1D8;border-radius:8px;padding:12px 14px;font-size:12.5px;line-height:1.55;color:#5A5750;margin-bottom:16px">Provedor detectado: <b>{{ addProv }}</b> (sem integração). A publicação é manual — a tela do domínio tem os 5 registros copiáveis e o status individual de cada um.</div>
+      </sc-if>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeAdd }}" style="background:transparent;color:#5A5750;border:1px solid #E4E1D8;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer">Fechar</button>
+        <button onClick="{{ goNewDom }}" style="background:#141414;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer">{{ goNewLabel }}</button>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ MODAL SUPRESSÃO ============ -->
+<sc-if value="{{ supModalOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:fixed;inset:0;background:rgba(20,20,20,.5);display:flex;align-items:center;justify-content:center;z-index:100">
+  <div style="width:440px;background:#fff;border-radius:14px;padding:26px 28px;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <h2 style="margin:0 0 10px;font-size:17px;font-weight:800">Remover bloqueio de {{ supModal.email }}?</h2>
+    <p style="margin:0 0 10px;font-size:13px;line-height:1.6;color:#5A5750">Este endereço foi bloqueado em <b>{{ supModal.data }}</b> por <b>{{ supModal.motivoTxt }}</b> ({{ supModal.origem }}). O Selo parou de aceitar envios para ele para proteger a reputação do cliente.</p>
+    <div style="background:#FBEAEA;border-radius:8px;padding:11px 14px;font-size:12.5px;line-height:1.55;color:#8A2323;margin-bottom:18px">Se este endereço continuar devolvendo emails, a reputação de envio de <b>{{ supModal.cliente }}</b> — e a entrega de todos os emails dele — pode ser prejudicada. Remova apenas se tiver confirmação de que a caixa voltou a funcionar.</div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onClick="{{ closeSupModal }}" style="background:transparent;color:#5A5750;border:1px solid #E4E1D8;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer">Cancelar</button>
+      <button onClick="{{ confirmSupRemove }}" style="background:#C22F2F;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer">Entendo o risco — remover bloqueio</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ MODAL NOVO PRODUTO / TOKEN ============ -->
+<sc-if value="{{ prodModalOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:fixed;inset:0;background:rgba(20,20,20,.5);display:flex;align-items:center;justify-content:center;z-index:100">
+  <div style="width:460px;background:#fff;border-radius:14px;padding:26px 28px;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <sc-if value="{{ prodStep0 }}" hint-placeholder-val="{{ true }}">
+      <h2 style="margin:0 0 14px;font-size:17px;font-weight:800">Novo produto</h2>
+      <label style="display:block;font-size:12px;font-weight:700;margin-bottom:6px">Nome do produto</label>
+      <input value="{{ prodName }}" onChange="{{ onProdName }}" placeholder="ex: Portal do Cliente" style="width:100%;box-sizing:border-box;font-size:13.5px;padding:10px 12px;border:1px solid #E4E1D8;border-radius:8px;outline-color:#F5C400;margin-bottom:18px"></input>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ closeProdModal }}" style="background:transparent;color:#5A5750;border:1px solid #E4E1D8;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer">Cancelar</button>
+        <button onClick="{{ createProd }}" style="background:#F5C400;color:#141414;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:800;cursor:pointer">Criar e gerar token</button>
+      </div>
+    </sc-if>
+    <sc-if value="{{ prodStep1 }}" hint-placeholder-val="{{ false }}">
+      <h2 style="margin:0 0 6px;font-size:17px;font-weight:800">Token de {{ prodName }}</h2>
+      <p style="margin:0 0 14px;font-size:13px;color:#5A5750;line-height:1.55">Copie e guarde agora. <b>Este token não será mostrado de novo</b> — se perder, será preciso revogar e gerar outro.</p>
+      <div style="display:flex;gap:8px;align-items:center;background:#141414;border-radius:8px;padding:12px 14px;margin-bottom:14px">
+        <span style="flex:1;font-family:'IBM Plex Mono',monospace;font-size:12px;color:#F5C400;word-break:break-all">selo_live_9fK2mXw41Lq8ZrT3vBnP6dY0</span>
+        <button onClick="{{ copyToken }}" style="background:#F5C400;color:#141414;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap">{{ copyTokenLabel }}</button>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onClick="{{ confirmTokenSaved }}" style="background:#141414;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer;opacity:{{ tokenBtnOpacity }}">Já copiei e salvei — concluir</button>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ MODAL REVOGAR ============ -->
+<sc-if value="{{ revokeOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:fixed;inset:0;background:rgba(20,20,20,.5);display:flex;align-items:center;justify-content:center;z-index:100">
+  <div style="width:420px;background:#fff;border-radius:14px;padding:26px 28px;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <h2 style="margin:0 0 10px;font-size:17px;font-weight:800">Revogar {{ revokeName }}?</h2>
+    <p style="margin:0 0 18px;font-size:13px;line-height:1.6;color:#5A5750">O token deixa de funcionar <b>imediatamente</b>. Todo envio feito por este produto passará a falhar até um novo token ser configurado.</p>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button onClick="{{ closeRevoke }}" style="background:transparent;color:#5A5750;border:1px solid #E4E1D8;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer">Cancelar</button>
+      <button onClick="{{ confirmRevoke }}" style="background:#C22F2F;color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:700;cursor:pointer">Revogar token</button>
+    </div>
+  </div>
+</div>
+</sc-if>
+
+<!-- ============ BUSCA GLOBAL ============ -->
+<sc-if value="{{ searchOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeSearch }}" style="position:fixed;inset:0;background:rgba(20,20,20,.5);display:flex;align-items:flex-start;justify-content:center;padding-top:14vh;z-index:100">
+  <div onClick="{{ stop }}" style="width:520px;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35)">
+    <input value="{{ query }}" onChange="{{ onQuery }}" autoFocus="{{ true }}" placeholder="domínio, email, cliente ou id de mensagem…" style="width:100%;box-sizing:border-box;font-family:'IBM Plex Mono',monospace;font-size:14px;padding:16px 18px;border:none;border-bottom:1px solid #EFEDE6;outline:none"></input>
+    <sc-for list="{{ results }}" as="r" hint-placeholder-count="4">
+      <button onClick="{{ r.go }}" style="display:flex;align-items:center;gap:12px;width:100%;box-sizing:border-box;background:transparent;border:none;padding:11px 18px;font-size:13px;text-align:left;cursor:pointer" style-hover="background:#FAF9F5">
+        <span style="font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:#8A867C;width:70px;flex:none">{{ r.kind }}</span>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">{{ r.label }}</span>
+      </button>
+    </sc-for>
+    <div style="padding:9px 18px;font-size:11px;color:#B8B4A9;border-top:1px solid #EFEDE6">esc fecha · enter abre o primeiro resultado</div>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#141414;color:#fff;border-radius:8px;padding:10px 18px;font-size:12.5px;font-weight:600;z-index:120;box-shadow:0 8px 24px rgba(0,0,0,.3)">{{ toast }}</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;filaVazia&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Simulação&quot;}}">
+class Component extends DCLogic {
+  state = { screen:'dash', detailId:null, treated:{}, removedSups:{}, revokedProds:{}, domFilter:'todos', logFilter:'todos', logQuery:'', logOpen:null, supModal:null, prodModal:false, prodStep:0, prodName:'', tokenCopied:false, revoke:null, searchOpen:false, query:'', copied:null, toast:null, verifying:false, domStates:{}, autoPub:0, lastCheck:'há 2 min', addModal:false, addStep:0, addCliente:'', addDominio:'', addErr:null, addTaken:null, addProv:null, newDoms:[] };
+
+  allDoms(){ return [...this.DOMS, ...this.state.newDoms]; }
+
+  submitAdd(){ const st=this.state; const v=(st.addDominio||'').trim().toLowerCase();
+    if(!/^([a-z0-9-]+\.)+[a-z]{2,}$/.test(v)){ this.setState({addErr:'format'}); return; }
+    const dup=this.allDoms().find(d=>d.dominio===v);
+    if(dup){ this.setState({addErr:'taken', addTaken:dup.cliente}); return; }
+    this.setState({addErr:null, addStep:1});
+    this._at=setTimeout(()=>{ const cf=/\.io$|cloud|\.dev$/.test(v); const prov=cf?'Cloudflare':'Registro.br';
+      const nd={id:'nd_'+v.replace(/\W/g,''), cliente:st.addCliente.trim()||v.split('.')[0], dominio:v, estado:'PENDENTE', tempo:'agora', entrega:'—', enviados:'0', cf};
+      this.setState({addStep:2, addProv:prov, newDoms:[...this.state.newDoms, nd]});
+    },1400); }
+
+  SEM = { verde:{dot:'#2E9E45',bg:'#E3F2E5',fg:'#1F7A33'}, vermelho:{dot:'#D64545',bg:'#FBEAEA',fg:'#8A2323'}, ambar:{dot:'#E07C1F',bg:'#FCEBD7',fg:'#8A4B00'}, cinza:{dot:'#8A867C',bg:'#EFEDE6',fg:'#5A5750'}, neutro:{dot:'#B8B4A9',bg:'#F5F4EF',fg:'#6B6860'} };
+  EST = { FALHOU:['Falhou','vermelho'], VERIFICANDO:['Verificando','ambar'], PENDENTE:['Pendente','cinza'], VERIFICADO:['Verificado','verde'], FALLBACK:['Fallback','neutro'] };
+
+  DOMS = [
+    {id:'acme', cliente:'Acme', dominio:'acme.com.br', estado:'FALHOU', tempo:'3 h', entrega:'97,2%', enviados:'4.812'},
+    {id:'beta', cliente:'Beta Corp', dominio:'betacorp.io', estado:'VERIFICADO', tempo:'42 d', entrega:'82,4%', enviados:'12.304', alerta:true},
+    {id:'gama', cliente:'Gama Saúde', dominio:'gamasaude.com.br', estado:'VERIFICANDO', tempo:'5 h', entrega:'—', enviados:'0'},
+    {id:'delta', cliente:'Delta Log', dominio:'deltalog.com.br', estado:'PENDENTE', tempo:'2 d', entrega:'—', enviados:'0', cf:true},
+    {id:'omni', cliente:'Omni Ensino', dominio:'omniensino.com.br', estado:'VERIFICADO', tempo:'118 d', entrega:'99,4%', enviados:'8.921'},
+    {id:'norte', cliente:'Norte Fin', dominio:'nortefin.com.br', estado:'VERIFICADO', tempo:'201 d', entrega:'99,8%', enviados:'22.410'},
+    {id:'pluma', cliente:'Pluma', dominio:'mail.selo.app', estado:'FALLBACK', tempo:'60 d', entrega:'99,1%', enviados:'1.204'} ];
+
+  LOGS = [
+    {id:'msg_8f2k1', dt:'09/08 14:02', rota:'noreply@acme.com.br → joao@acme.com.br', para:'joao@acme.com.br', assunto:'Convite para o workspace Acme', tag:'invite', st:'DEVOLVIDO', tl:[['enviado','14:02:31','#141414'],['devolvido','14:02:33 · 550 5.1.1 user unknown','#D64545']]},
+    {id:'msg_8f2j9', dt:'09/08 13:58', rota:'noreply@nortefin.com.br → ana@camposfilho.adv.br', para:'ana@camposfilho.adv.br', assunto:'Redefinição de senha', tag:'password-reset', st:'ENTREGUE', tl:[['enviado','13:58:02','#141414'],['entregue','13:58:05','#2E9E45']]},
+    {id:'msg_8f2h4', dt:'09/08 13:41', rota:'noreply@betacorp.io → rh@transmog.com.br', para:'rh@transmog.com.br', assunto:'Convite para o workspace Beta', tag:'invite', st:'SPAM', tl:[['enviado','13:41:12','#141414'],['entregue','13:41:15','#2E9E45'],['marcado como spam','13:52:40 · complaint via FBL','#D64545']]},
+    {id:'msg_8f2g7', dt:'09/08 13:22', rota:'noreply@betacorp.io → carlos@ind-mtl.com.br', para:'carlos@ind-mtl.com.br', assunto:'Convite para o workspace Beta', tag:'invite', st:'TENTANDO', tl:[['enviado','13:22:08','#141414'],['adiado','13:22:11 · 452 mailbox full — nova tentativa 15:22','#E07C1F']]},
+    {id:'msg_8f2f2', dt:'09/08 12:50', rota:'noreply@omniensino.com.br → prof.silva@escola.edu.br', para:'prof.silva@escola.edu.br', assunto:'Convite para o workspace Omni', tag:'invite', st:'ENTREGUE', tl:[['enviado','12:50:44','#141414'],['entregue','12:50:47','#2E9E45']]},
+    {id:'msg_8f2e5', dt:'09/08 12:31', rota:'mail.selo.app → dora@pluma.design', para:'dora@pluma.design', assunto:'Redefinição de senha', tag:'password-reset', st:'ENTREGUE', tl:[['enviado','12:31:19','#141414'],['entregue','12:31:21','#2E9E45']]},
+    {id:'msg_8f2d1', dt:'09/08 11:47', rota:'noreply@betacorp.io → felipe@rocha.eng.br', para:'felipe@rocha.eng.br', assunto:'Reenvio: convite Beta', tag:'invite-resend', st:'BLOQUEADO', tl:[['recusado','11:47:03 · endereço na lista de supressão (devolvido em 02/08)','#8A2323']]},
+    {id:'msg_8f2c8', dt:'09/08 11:12', rota:'noreply@acme.com.br → maria@acme.com.br', para:'maria@acme.com.br', assunto:'Convite para o workspace Acme', tag:'invite', st:'ENTREGUE', tl:[['enviado','11:12:55','#141414'],['entregue','11:12:58','#2E9E45']]} ];
+
+  SUPS = [
+    {id:'s1', email:'joao@acme.com.br', cliente:'Acme', motivo:'devolvido', data:'09/08/2026', origem:'automática'},
+    {id:'s2', email:'rh@transmog.com.br', cliente:'Beta Corp', motivo:'spam', data:'09/08/2026', origem:'automática', hot:true},
+    {id:'s3', email:'felipe@rocha.eng.br', cliente:'Beta Corp', motivo:'devolvido', data:'02/08/2026', origem:'automática', hot:true},
+    {id:'s4', email:'vendas@lgx-parts.com.br', cliente:'Beta Corp', motivo:'devolvido', data:'01/08/2026', origem:'automática', hot:true},
+    {id:'s5', email:'antigo@omniensino.com.br', cliente:'Omni Ensino', motivo:'manual', data:'20/07/2026', origem:'manual'},
+    {id:'s6', email:'k.tanaka@nortefin.com.br', cliente:'Norte Fin', motivo:'devolvido', data:'11/07/2026', origem:'automática'} ];
+
+  PRODS = [
+    {id:'p1', nome:'App Acme HR', st:'ativo', criado:'12/01/2026', uso:'há 4 min'},
+    {id:'p2', nome:'Portal Beta', st:'ativo', criado:'03/03/2026', uso:'há 2 h'},
+    {id:'p3', nome:'Legado v1', st:'revogado', criado:'10/10/2025', uso:'há 92 d'} ];
+
+  componentDidMount(){
+    this._kd = (e)=>{ const tag=(e.target.tagName||'').toLowerCase();
+      if(e.key==='Escape'){ this.setState({searchOpen:false, supModal:null, revoke:null}); return; }
+      if(tag==='input'||tag==='textarea') return;
+      if(e.key==='/'||((e.metaKey||e.ctrlKey)&&e.key==='k')){ e.preventDefault(); this.setState({searchOpen:true, query:''}); } };
+    document.addEventListener('keydown', this._kd); }
+  componentWillUnmount(){ document.removeEventListener('keydown', this._kd); clearTimeout(this._tt); clearTimeout(this._vt); clearTimeout(this._ct); clearTimeout(this._at); }
+
+  showToast(msg){ this.setState({toast:msg}); clearTimeout(this._tt); this._tt=setTimeout(()=>this.setState({toast:null}),2200); }
+  copy(key,text){ try{navigator.clipboard.writeText(text);}catch(e){} this.setState({copied:key}); clearTimeout(this._ct); this._ct=setTimeout(()=>this.setState({copied:null}),1600); }
+  estadoDe(d){ return this.state.domStates[d.id] || d.estado; }
+  badge(est){ const [label,fam]=this.EST[est]; const c=this.SEM[fam]; return {stLabel:label, bg:c.bg, fg:c.fg, dot:c.dot}; }
+
+  recsDe(id, est){ const d=this.allDoms().find(x=>x.id===id); const dom=d?d.dominio:'';
+    const base=[ ['CNAME','a1b2c3._domainkey.'+dom,'a1b2c3.dkim.amazonses.com'], ['CNAME','d4e5f6._domainkey.'+dom,'d4e5f6.dkim.amazonses.com'], ['CNAME','g7h8i9._domainkey.'+dom,'g7h8i9.dkim.amazonses.com'], ['MX','envio.'+dom,'10 feedback-smtp.sa-east-1.amazonses.com'], ['TXT','envio.'+dom,'"v=spf1 include:amazonses.com ~all"'] ];
+    let sts; if(est==='VERIFICADO') sts=['ok','ok','ok','ok','ok']; else if(est==='FALHOU') sts=['ok','ok','bad','ok','ok']; else if(est==='VERIFICANDO') sts=['ok','ok','wait','ok','wait']; else sts=['wait','wait','wait','wait','wait'];
+    const M={wait:['aguardando','#8A867C','#B8B4A9'], ok:['encontrado ✓','#1F7A33','#2E9E45'], bad:['incorreto ✗','#C22F2F','#D64545']};
+    return base.map((r,i)=>{ const m=M[sts[i]]; return { type:r[0], name:r[1], value:r[2], stLabel:m[0], stColor:m[1], stDot:m[2],
+      diff: sts[i]==='bad', diffFound:'"g7h8i9.dkim.amazonses.com"', diffWant:'g7h8i9.dkim.amazonses.com',
+      copyName:()=>this.copy('n'+i,r[1]), copyValue:()=>this.copy('v'+i,r[2]),
+      nameCopied:this.state.copied==='n'+i, nameNotCopied:this.state.copied!=='n'+i,
+      valueCopied:this.state.copied==='v'+i, valueNotCopied:this.state.copied!=='v'+i }; }); }
+
+  verify(){ if(this.state.verifying) return; const id=this.state.detailId; this.setState({verifying:true});
+    this._vt=setTimeout(()=>{ this.setState({verifying:false, lastCheck:'agora mesmo', domStates:{...this.state.domStates,[id]:'VERIFICADO'}}); this.showToast('Verificação concluída — domínio autenticado ✓'); },1200); }
+
+  renderVals(){
+    const st=this.state; const S=this.SEM;
+    const nav=[['dash','Farol'],['doms','Domínios'],['log','Envios'],['sups','Supressões'],['prods','Produtos']];
+    const filaVazia=this.props.filaVazia ?? false;
+    const filaAll=[
+      {k:'f1', tag:'Bounce novo', fam:'vermelho', pre:'convite para ', mono:'joao@acme.com.br', post:' devolvido — endereço não existe', a1Label:'Ver detalhes', go:()=>this.setState({screen:'log', logOpen:'msg_8f2k1', logFilter:'todos'})},
+      {k:'f2', tag:'Domínio com falha', fam:'vermelho', pre:'', mono:'acme.com.br', post:': registro CNAME 3 com valor incorreto', a1Label:'Ver diagnóstico', go:()=>this.setState({screen:'detail', detailId:'acme'})},
+      {k:'f3', tag:'Entrega caindo', fam:'ambar', pre:'Beta Corp: ', mono:'82,4%', post:' de entrega nos últimos 7 d (média 99%)', a1Label:'Investigar', go:()=>this.setState({screen:'log'})},
+      {k:'f4', tag:'Supressões concentradas', fam:'ambar', pre:'Beta Corp: ', mono:'14', post:' novas supressões em 30 d', a1Label:'Ver supressões', go:()=>this.setState({screen:'sups'})} ];
+    const fila=(filaVazia?[]:filaAll.filter(f=>!st.treated[f.k])).map(f=>{ const c=S[f.fam]; return {...f, bg:c.bg, fg:c.fg, dot:c.dot, a1:f.go, treat:()=>{ this.setState({treated:{...this.state.treated,[f.k]:true}}); this.showToast('Item marcado como tratado'); }}; });
+    const filaCount=fila.length;
+    const navItems=nav.map(([k,label])=>({label, count:k==='dash'&&filaCount?String(filaCount):null,
+      bg:st.screen===k||(k==='doms'&&st.screen==='detail')?'#232220':'transparent',
+      fg:st.screen===k||(k==='doms'&&st.screen==='detail')?'#fff':'#B8B4A9',
+      edge:st.screen===k||(k==='doms'&&st.screen==='detail')?'#F5C400':'transparent',
+      w:st.screen===k?'700':'500', go:()=>this.setState({screen:k}) }));
+
+    const stats=[ {value:'7', sub:'31 em 7 dias', label:'não entregues · 24 h', color:'#C22F2F'},
+      {value:'1', sub:null, label:'domínios com problema', color:'#C22F2F'},
+      {value:'16', sub:'média: 4/semana', label:'supressões novas · 7 d', color:'#8A4B00'},
+      {value:'48.312', sub:null, label:'enviados no mês', color:'#141414'} ];
+    const barsData=[42,38,45,51,40,12,9,48,52,47,55,49,14,11,53,58,50,46,61,16,12,57,63,55,60,52,18,13,59,64];
+    const bars=barsData.map((v,i)=>({h:Math.round(v)+'px', c:i===barsData.length-1?'#F5C400':'#DDD9CD'}));
+
+    const ordem={FALHOU:0,VERIFICANDO:2,PENDENTE:3,VERIFICADO:4,FALLBACK:5};
+    const domsAll=this.allDoms().map(d=>({...d, estadoAtual:this.estadoDe(d)})).sort((a,b)=>(ordem[a.estadoAtual]-(a.alerta?3:0))-(ordem[b.estadoAtual]-(b.alerta?3:0)));
+    const df=st.domFilter;
+    const domsF=domsAll.filter(d=> df==='todos' || (df==='problemas'?(d.estadoAtual==='FALHOU'||d.alerta):d.estadoAtual===df));
+    const doms=domsF.map(d=>({ ...d, ...this.badge(d.estadoAtual), tempo:'há '+d.tempo,
+      entColor:d.alerta?'#B84A00':(d.entrega==='—'?'#B8B4A9':'#141414'),
+      open:()=>this.setState({screen:'detail', detailId:d.id, autoPub:0}) }));
+    const domFilters=[['todos','todos'],['problemas','problemas'],['PENDENTE','pendente'],['VERIFICANDO','verificando'],['VERIFICADO','verificado'],['FALLBACK','fallback']].map(([v,label])=>({label, set:()=>this.setState({domFilter:v}), bg:df===v?'#141414':'#fff', fg:df===v?'#fff':'#5A5750', bd:df===v?'#141414':'#E4E1D8'}));
+
+    const detId=st.detailId||'acme'; const detDom=this.allDoms().find(d=>d.id===detId)||this.DOMS[0];
+    const detEst=this.estadoDe(detDom);
+    const det={ ...detDom, ...this.badge(detEst), verificado:detEst==='VERIFICADO',
+      autoCta:!!detDom.cf && detEst==='PENDENTE' && st.autoPub<2, autoOk:!!detDom.cf && st.autoPub===2,
+      envios:this.LOGS.filter(l=>l.rota.includes(detDom.dominio)).slice(0,4).map(l=>{ const b=this.logBadge(l.st); return {hora:l.dt.split(' ')[1], para:l.para, ...b}; }),
+      supTxt:(detId==='beta'?'14 endereços bloqueados nos últimos 30 d — acima do normal.':detId==='acme'?'1 endereço bloqueado (joao@acme.com.br, devolvido hoje).':'Nenhum endereço bloqueado.') };
+    if(det.envios.length===0) det.envios=[{hora:'—', para:'nenhum envio ainda', st:'—', bg:'#F5F4EF', fg:'#8A867C', dot:'#B8B4A9'}];
+
+    const lf=st.logFilter, lq=st.logQuery.toLowerCase();
+    const logFilters=[['todos','todos'],['ENTREGUE','entregue'],['DEVOLVIDO','devolvido'],['TENTANDO','tentando'],['SPAM','spam'],['BLOQUEADO','bloqueado']].map(([v,label])=>({label, set:()=>this.setState({logFilter:v}), bg:lf===v?'#141414':'#fff', fg:lf===v?'#fff':'#5A5750', bd:lf===v?'#141414':'#E4E1D8'}));
+    const logs=this.LOGS.filter(l=>(lf==='todos'||l.st===lf)&&(!lq||l.para.toLowerCase().includes(lq))).map(l=>{ const b=this.logBadge(l.st); const open=st.logOpen===l.id;
+      return {...l, ...b, open, rowBg:open?'#FAF9F5':'transparent', st:b.st,
+        toggle:()=>this.setState({logOpen:open?null:l.id}),
+        timeline:l.tl.map(t=>({ev:t[0], info:t[1], dot:t[2]})) }; });
+
+    const supBadge={devolvido:S.vermelho, spam:S.vermelho, manual:S.cinza};
+    const sups=this.SUPS.filter(s=>!st.removedSups[s.id]).map(s=>{ const c=supBadge[s.motivo]; return {...s, bg:c.bg, fg:c.fg, dot:c.dot, rowBg:s.hot?'#FDF8EE':'transparent', remove:()=>this.setState({supModal:s}) }; });
+
+    const prodBadge={ativo:S.verde, revogado:S.cinza};
+    const prods=this.PRODS.map(p=>{ const revoked=st.revokedProds[p.id]||p.st==='revogado'; const stx=revoked?'revogado':'ativo'; const c=prodBadge[stx];
+      return {...p, st:stx, ativo:!revoked, bg:c.bg, fg:c.fg, dot:c.dot, revoke:()=>this.setState({revoke:p}) }; });
+
+    const q=st.query.toLowerCase();
+    const pool=[ ...this.allDoms().map(d=>({kind:'domínio', label:d.dominio+' · '+d.cliente, go:()=>this.setState({searchOpen:false, screen:'detail', detailId:d.id})})),
+      ...this.LOGS.slice(0,5).map(l=>({kind:'email', label:l.para, go:()=>this.setState({searchOpen:false, screen:'log', logOpen:l.id})})),
+      ...this.PRODS.map(p=>({kind:'produto', label:p.nome, go:()=>this.setState({searchOpen:false, screen:'prods'})})) ];
+    const results=(q?pool.filter(r=>r.label.toLowerCase().includes(q)):pool.slice(0,6)).slice(0,7);
+
+    const auth=st.authStep||'creds';
+    return {
+      isLogin:st.screen==='login', isApp:st.screen!=='login',
+      authCreds:auth==='creds', authOtp:auth==='otp', authLink:auth==='link',
+      authEmail:st.authEmail||'', onAuthEmail:(e)=>this.setState({authEmail:e.target.value, authErr:null}),
+      authSenha:st.authSenha||'', onAuthSenha:(e)=>this.setState({authSenha:e.target.value, authErr:null}),
+      onAuthKey:(e)=>{ if(e.key==='Enter') this.doLogin(); },
+      authErrCreds:st.authErr==='creds', authErrEmail:st.authErr==='email', authErrOtp:st.authErr==='otp',
+      credsBorder: st.authErr==='creds'?'#D64545':'#E4E1D8',
+      otpBorder: st.authErr==='otp'?'#D64545':'#E4E1D8',
+      authMasked:this.maskEmail(st.authEmail),
+      authCode:st.authCode||'',
+      onAuthCode:(e)=>{ const v=e.target.value.replace(/\D/g,'').slice(0,6); this.setState({authCode:v, authErr:null}); if(v.length===6){ clearTimeout(this._ot); this._ot=setTimeout(()=>this.submitOtp(v),300); } },
+      resendLabel: st.resendIn>0? 'reenviar em '+st.resendIn+' s':'reenviar',
+      resendDim: st.resendIn>0?'0.45':'1',
+      doResend:(e)=>{ e.preventDefault(); if(this.state.resendIn>0) return; this.startResend(); this.showToast((auth==='otp'?'Código reenviado para ':'Link reenviado para ')+this.maskEmail(st.authEmail)); },
+      backToCreds:(e)=>{ e.preventDefault(); clearInterval(this._rt); this.setState({authStep:'creds', authCode:'', authSenha:'', authErr:null, resendIn:0}); },
+      goMagic:(e)=>{ e.preventDefault(); if(!(st.authEmail||'').includes('@')){ this.setState({authErr:'email'}); return; } this.setState({authStep:'link', authErr:null}); this.startResend(); },
+      openMagicLink:()=>this.finishAuth(),
+      isDash:st.screen==='dash', isDoms:st.screen==='doms', isDetail:st.screen==='detail', isLog:st.screen==='log', isSups:st.screen==='sups', isProds:st.screen==='prods',
+      doLogin:()=>this.doLogin(), doLogout:()=>{ clearInterval(this._rt); this.setState({screen:'login', authStep:'creds', authSenha:'', authCode:'', authErr:null, resendIn:0}); },
+      navItems, stats, bars, fila, filaEmpty:fila.length===0, filaCheia:fila.length>0,
+      filaResumo: fila.length? fila.length+' pendência'+(fila.length>1?'s':'')+' · mais antiga há 3 h' : '',
+      domFilters, doms, goDoms:()=>this.setState({screen:'doms'}), goSups:()=>this.setState({screen:'sups'}), goLog:()=>this.setState({screen:'log'}),
+      det, recs:this.recsDe(detId, detEst), lastCheck:st.lastCheck,
+      verifyNow:()=>this.verify(), verifyLabel:st.verifying?'Verificando…':'Verificar agora',
+      autoPublish:()=>{ if(st.autoPub===1) return; this.setState({autoPub:1}); this._vt=setTimeout(()=>{ this.setState({autoPub:2, domStates:{...this.state.domStates,[detId]:'VERIFICADO'}, lastCheck:'agora mesmo'}); this.showToast('5 registros publicados na Cloudflare ✓'); },1500); },
+      autoLabel: st.autoPub===1?'Publicando 5 registros…':'Publicar automaticamente',
+      logFilters, logs, logQuery:st.logQuery, onLogQuery:(e)=>this.setState({logQuery:e.target.value}),
+      sups, supModalOpen:!!st.supModal, supModal: st.supModal?{...st.supModal, motivoTxt: st.supModal.motivo==='devolvido'?'devolução definitiva (endereço não existe)': st.supModal.motivo==='spam'?'marcação de spam pelo destinatário':'bloqueio manual'}:{},
+      closeSupModal:()=>this.setState({supModal:null}),
+      confirmSupRemove:()=>{ const s=st.supModal; this.setState({removedSups:{...st.removedSups,[s.id]:true}, supModal:null}); this.showToast('Bloqueio de '+s.email+' removido'); },
+      prods, newProd:()=>this.setState({prodModal:true, prodStep:0, prodName:'', tokenCopied:false}),
+      prodModalOpen:st.prodModal, prodStep0:st.prodStep===0, prodStep1:st.prodStep===1, prodName:st.prodName||'novo produto',
+      onProdName:(e)=>this.setState({prodName:e.target.value}),
+      createProd:()=>this.setState({prodStep:1}),
+      closeProdModal:()=>this.setState({prodModal:false}),
+      copyToken:()=>{ this.copy('tok','selo_live_9fK2mXw41Lq8ZrT3vBnP6dY0'); this.setState({tokenCopied:true}); },
+      copyTokenLabel: st.copied==='tok'?'copiado ✓':'copiar',
+      tokenBtnOpacity: st.tokenCopied?'1':'0.4',
+      confirmTokenSaved:()=>{ if(!st.tokenCopied){ this.showToast('Copie o token antes de concluir'); return; } this.setState({prodModal:false}); this.showToast('Produto criado ✓'); },
+      revokeOpen:!!st.revoke, revokeName:st.revoke?st.revoke.nome:'',
+      closeRevoke:()=>this.setState({revoke:null}),
+      confirmRevoke:()=>{ const p=st.revoke; this.setState({revokedProds:{...st.revokedProds,[p.id]:true}, revoke:null}); this.showToast('Token de '+p.nome+' revogado'); },
+      searchOpen:st.searchOpen, openSearch:()=>this.setState({searchOpen:true, query:''}), closeSearch:()=>this.setState({searchOpen:false}),
+      stop:(e)=>e.stopPropagation(), query:st.query, onQuery:(e)=>this.setState({query:e.target.value}), results,
+      toast:st.toast,
+      openAdd:()=>this.setState({addModal:true, addStep:0, addCliente:'', addDominio:'', addErr:null}),
+      closeAdd:()=>this.setState({addModal:false}),
+      addOpen:st.addModal, addStep0:st.addStep===0, addStep1:st.addStep===1, addStep2:st.addStep===2,
+      addCliente:st.addCliente, addDominio:st.addDominio,
+      onAddCliente:(e)=>this.setState({addCliente:e.target.value}),
+      onAddDominio:(e)=>this.setState({addDominio:e.target.value, addErr:null}),
+      onAddKey:(e)=>{ if(e.key==='Enter') this.submitAdd(); },
+      addBorder: st.addErr?'#D64545':'#E4E1D8',
+      addErrFormat:st.addErr==='format', addErrTaken:st.addErr==='taken', addTakenCliente:st.addTaken,
+      submitAdd:()=>this.submitAdd(),
+      addProv:st.addProv, addIsCf:st.addProv==='Cloudflare', addIsManual:!!st.addProv&&st.addProv!=='Cloudflare',
+      goNewLabel: st.addProv==='Cloudflare'?'Ir para o domínio e publicar':'Ir para os registros DNS',
+      goNewDom:()=>{ const nd=st.newDoms[st.newDoms.length-1]; this.setState({addModal:false, screen:'detail', detailId:nd?nd.id:'acme', autoPub:0}); } };
+  }
+
+  maskEmail(em){ em=em||'operador@selo.app'; const i=em.indexOf('@'); return i>0? em.slice(0,1)+'•••'+em.slice(i) : em; }
+  doLogin(){ const st=this.state; if(!(st.authEmail||'').includes('@') || !(st.authSenha||'').trim()){ this.setState({authErr:'creds'}); return; } this.setState({authStep:'otp', authCode:'', authErr:null}); this.startResend(); }
+  submitOtp(v){ if((this.state.authStep||'creds')!=='otp') return; if(v==='000000'){ this.setState({authErr:'otp', authCode:''}); return; } this.finishAuth(); }
+  finishAuth(){ clearInterval(this._rt); this.setState({screen:'dash', authStep:'creds', authSenha:'', authCode:'', authErr:null, resendIn:0}); this.showToast('Sessão iniciada · expira em 12 h'); }
+  startResend(){ clearInterval(this._rt); this.setState({resendIn:30}); this._rt=setInterval(()=>{ const r=(this.state.resendIn||0)-1; this.setState({resendIn:Math.max(0,r)}); if(r<=0) clearInterval(this._rt); },1000); }
+  logBadge(s){ const S=this.SEM; const M={ ENTREGUE:['Entregue',S.verde], DEVOLVIDO:['Devolvido',S.vermelho], TENTANDO:['Tentando de novo',S.ambar], SPAM:['Marcado como spam',S.vermelho], BLOQUEADO:['Bloqueado',S.cinza], 'ENVIANDO':['Enviando…',S.cinza], '—':['—',S.neutro] };
+    const [label,c]=M[s]||M['—']; return {st:label, bg:c.bg, fg:c.fg, dot:c.dot}; }
+}
+</script>
+</body>
+</html>
