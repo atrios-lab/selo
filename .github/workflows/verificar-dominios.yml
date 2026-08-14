@@ -1,0 +1,22 @@
+# O cron da Vercel no plano Hobby só roda 1x por dia, e uma expressão mais
+# frequente falha no deploy. Como a verificação precisa pegar propagação de DNS
+# e regressão em tempo útil, o agendador vive aqui.
+name: Verificar domínios
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  # Permite disparar na mão pela aba Actions, útil para testar.
+  workflow_dispatch:
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      # -f faz o curl falhar em status >= 400, então cron quebrado aparece como
+      # workflow vermelho em vez de sumir em silêncio.
+      - name: Chamar a rota de verificação
+        run: |
+          curl -sS -f --max-time 120 \
+            -H "Authorization: Bearer ${{ secrets.SELO_CRON_SECRET }}" \
+            https://selo.atrioss.com/api/cron/verify-domains
