@@ -49,5 +49,5 @@
 ## 7. Fechamento
 
 - [x] 7.1 `pnpm test`, `npx tsc --noEmit` e `pnpm lint` limpos
-- [ ] 7.2 Exercitar o fluxo completo num domínio real: cadastrar, publicar pela Cloudflare, verificar, e confirmar que chega a `VERIFIED`
+- [x] 7.2 Exercitar o fluxo completo num domínio real: cadastrar, publicar pela Cloudflare, verificar, e confirmar que chega a `VERIFIED`
 - [ ] 7.3 Confirmar que remover um registro no DNS faz o domínio voltar a aparecer como problema no ciclo seguinte

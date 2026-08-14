@@ -9,7 +9,7 @@ Contexto completo do produto, premissas, arquitetura SES, modelo de dados e cont
 ## Stack
 
 - Next.js (App Router) fullstack: API + painel no mesmo deploy
-- Postgres + Drizzle
+- Postgres (Neon) + Prisma 7 (generator `prisma-client`, driver adapter `@prisma/adapter-pg`)
 - Amazon SES v2 (`us-east-1`) para envio, SNS para eventos (bounce/complaint/delivery)
 - shadcn/ui (Radix + Tailwind) no painel
 
